@@ -17,7 +17,7 @@ function whatIsHappening() {
     echo '<h2>$_SESSION</h2>';
     var_dump($_SESSION);
 }
-whatIsHappening();
+//    whatIsHappening();
 
 //your products with their price.
 $food = [
@@ -84,11 +84,22 @@ function handleOrder($food, $drinks){
        $interval = new DateInterval($timeAdded);
        $deliveryTime = $timeNow ->add($interval);
 
-       echo "Thank you for choosing us! <br>";
+    echo "<h1>Thank you for choosing the PHP!</h1><br>";
+    echo "<strong>Your order details:</strong> <br>";
+    foreach($_SESSION['orders'] as $order){
+        echo "-" . $order ."<br> ";
+    }
+    echo "<hr>";
        echo "Your receipt has been sent to {$_SESSION['email']}<br>";
-       echo "The delivery will arrive at {$_SESSION['street']}{$_SESSION['streetnumber']} in {$_SESSION['city']}<br>";
+       echo "The delivery will arrive at {$_SESSION['street']} {$_SESSION['streetnumber']} in {$_SESSION['city']}<br>";
        echo "Expected delivery time: " . $deliveryTime ->format("H:i");
-       echo " your order amount to " . $price;
+       echo " <br>your order amounts to &euro;" . $price;
+
+       if(mail('chrishargan@gmail.com', 'Your order', 'Your order has successfully been processed', 'From: user@example.com')){
+           echo "<br> We hope to hear from you again soon! ";
+       }else {
+           echo "<br>Something went terribly wrong";
+    }
        session_destroy();
        die();
    }
