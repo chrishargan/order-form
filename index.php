@@ -44,40 +44,69 @@ if(!isset($_GET['food']) || $_GET['food'] === '1'){
     $products = $drinks;
     $_SESSION['food'] = $_GET['food'];
 }
+if(!isset($_SESSION['orders'])) {
+    $_SESSION['orders']= [];
+}
 
 $totalValue = 0;
+if(!isset($_COOKIE["total_spent"])){
+    setcookie("total_spent", '0');
+}
+function calcPrice($food, $drinks){
+    $bill = 0;
+    foreach (array_merge($food, $drinks) as $item){
+        foreach ($_SESSION['orders'] as $order){
+            if($item['name'] === $order){
+                $bill += $item['price'];
+            }
+        }
+    }
+    if(isset($_POST['express_delivery'])){
+        $bill += 5;
+    }
+    $prev_spent = (int)$_COOKIE["total_spent"];
+    $prev_spent += $bill;
+    setcookie('total_spent', (string)$prev_spent);
+    $_COOKIE['total_spent'] = (string)$prev_spent;
+    return $bill;
+}
 
 
-function handleOrder(){
-
-
+function handleOrder($food, $drinks){
 
    $timeNow= new DateTime();
+   $price = calcPrice($food, $drinks);
+
    if (isset($_POST['express_delivery'])) {
        $timeAdded = "PT45M";}
        else {$timeAdded = "PT120M";
        }
        $interval = new DateInterval($timeAdded);
        $deliveryTime = $timeNow ->add($interval);
-       echo "Your order is complete!";
-       echo "you ordered with email= {$_SESSION['email']}<br>";
+
+       echo "Thank you for choosing us! <br>";
+       echo "Your receipt has been sent to {$_SESSION['email']}<br>";
        echo "The delivery will arrive at {$_SESSION['street']}{$_SESSION['streetnumber']} in {$_SESSION['city']}<br>";
-       echo "Expected delivery time / " . $deliveryTime ->format("H:i");
+       echo "Expected delivery time: " . $deliveryTime ->format("H:i");
+       echo " your order amount to " . $price;
        session_destroy();
        die();
    }
 
-function handleRest() {
-    echo "<div class=\"alert alert-danger\" role=\"alert\"> Please fill in all required fields</div>";
-}
-
-function validateForm(){
+function validateForm($food, $drinks){
     $email = $_POST['email'];
     $street = $_POST['street'];
     $streetNumber = $_POST['streetnumber'];
     $city = $_POST['city'];
     $zipcode = $_POST['zipcode'];
-
+    $orders = $_POST ['products'];
+    foreach ($orders as $order){
+        foreach (array_merge($food, $drinks) as $item){
+            if($order === $item['name'] && !in_array($order, $_SESSION['orders'], true)){
+                array_push($_SESSION['orders'], $order);
+            }
+        }
+    }
     if(empty($email) || !filter_var($email, FILTER_SANITIZE_EMAIL)){
         echo "<div class=\"alert alert-danger\" role=\"alert\"> Please fill in a valid email.</div>";
     } else{
@@ -103,15 +132,15 @@ function validateForm(){
     } else {
         $_SESSION['zipcode'] = trim($zipcode);
     }
-    if(empty($email) || !filter_var($email, FILTER_SANITIZE_EMAIL) || empty($street) ||
-        empty($streetNumber) || !is_numeric($streetNumber) || empty($city) || empty($zipcode) || !is_numeric($zipcode)){
-        handleRest();
-    } else {
-        handleOrder();
+    if(!empty($email) && filter_var($email, FILTER_SANITIZE_EMAIL) && !empty($street) &&
+        !empty($streetNumber) && is_numeric($streetNumber) && !empty($city) && !empty($zipcode) && is_numeric($zipcode)){
+        handleOrder($food, $drinks);
     }
+
 }
+
 if($_SESSION['isStarted']){
-    validateForm();
+    validateForm($food, $drinks);
 } else {
     $_SESSION['isStarted'] = true;
 }
@@ -143,8 +172,8 @@ if(isset($_POST['email'])) {
 
 // input validation
 
-$emailError = $streetError = $streetNumberError = $cityError = $zipcodeError = "";
-$email = $street = $city = "";
+// $emailError = $streetError = $streetNumberError = $cityError = $zipcodeError = "";
+// $email = $street = $city = "";
 
 
 
