@@ -27,7 +27,7 @@ $food = [
     ['name' => 'Club Chicken', 'price' => 4],
     ['name' => 'Club Salmon', 'price' => 5]
 ];
-
+// changed the products to food and drinks arrays
 $drinks = [
     ['name' => 'Cola', 'price' => 2],
     ['name' => 'Fanta', 'price' => 2],
@@ -58,6 +58,7 @@ function calcPrice($food, $drinks){
         foreach ($_SESSION['orders'] as $order){
             if($item['name'] === $order){
                 $bill += $item['price'];
+                                            //for larger arrays to cease the loop use break;
             }
         }
     }
@@ -155,37 +156,5 @@ if($_SESSION['isStarted']){
 } else {
     $_SESSION['isStarted'] = true;
 }
-
-
-
-/*
-if(isset($_POST['email'])) {
-
-    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo("Thank you");
-    } else {
-        echo("$email is not a valid email address");
-    }
-//validate numbers
-    if (is_numeric($streetNumber)) {
-        var_dump($streetNumber);
-    } else {
-        echo ($streetNumber. "is not a number");
-    }
-    $mailTo = "@.com";
-  //  $headers = "From:" . $email;
-    $txt = "You have received an order from".$email.".\n\n".$street.$streetNumber.".\n".$city.$zipcode;
-
-  //  mail($mailTo, $txt, $headers);
-  //  header("Location: form-view.php?mailsend");
-}
- */
-
-// input validation
-
-// $emailError = $streetError = $streetNumberError = $cityError = $zipcodeError = "";
-// $email = $street = $city = "";
-
-
 
 require 'form-view.php';
